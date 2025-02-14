@@ -1,1 +1,6 @@
 node_modules
+
+# test usage folder for playing with docker
+docker
+
+package-lock.json
