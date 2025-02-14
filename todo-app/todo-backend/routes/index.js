@@ -3,6 +3,7 @@ const router = express.Router();
 
 require("dotenv").config();
 const configs = require("../util/config");
+const redis = require("../redis");
 
 let visits = 0;
 
