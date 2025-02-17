@@ -1,18 +1,14 @@
 const express = require("express");
 const router = express.Router();
 
-require("dotenv").config();
-const configs = require("../util/config");
+const redis = require("../redis");
 
-let visits = 0;
-
-/* GET index data. */
+/* GET redis data. */
 router.get("/", async (req, res) => {
-  visits++;
+  counter = await redis.getAsync("counter");
 
   res.send({
-    ...configs,
-    visits,
+    counter,
   });
 });
 
