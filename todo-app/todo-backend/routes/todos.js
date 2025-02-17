@@ -18,14 +18,7 @@ router.post("/", async (req, res) => {
     done: req.body.done,
   });
 
-  rawRedisCounter = await redis.getAsync("counter");
-  parsedRedisCounter = parseInt(rawRedisCounter);
-
-  if (isNaN(parsedRedisCounter)) {
-    parsedRedisCounter = 0;
-  }
-
-  redis.setAsync("counter", parsedRedisCounter + 1);
+  await incrementTodoCounter();
 
   res.send(todo);
 });
@@ -71,4 +64,19 @@ singleRouter.put("/", async (req, res) => {
 
 router.use("/:id", findByIdMiddleware, singleRouter);
 
+async function incrementTodoCounter() {
+  formatNoteCounterIfNeeded();
+
+  redis.setAsync("added_todos", parsedRedisCounter + 1);
+}
+
 module.exports = router;
+
+async function formatNoteCounterIfNeeded() {
+  rawRedisCounter = await redis.getAsync("added_todos");
+  parsedRedisCounter = parseInt(rawRedisCounter);
+
+  if (!parsedRedisCounter || isNaN(parsedRedisCounter)) {
+    parsedRedisCounter = 0;
+  }
+}
