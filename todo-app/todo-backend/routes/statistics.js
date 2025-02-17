@@ -5,7 +5,6 @@ const redis = require("../redis");
 
 /* GET redis data. */
 router.get("/", async (req, res) => {
-  formatNoteCounterIfNeeded();
   raw_added_todos = await redis.getAsync("added_todos");
 
   added_todos = parseInt(raw_added_todos);

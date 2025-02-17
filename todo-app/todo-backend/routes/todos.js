@@ -65,7 +65,7 @@ singleRouter.put("/", async (req, res) => {
 router.use("/:id", findByIdMiddleware, singleRouter);
 
 async function incrementTodoCounter() {
-  formatNoteCounterIfNeeded();
+  await formatNoteCounterIfNeeded();
 
   redis.setAsync("added_todos", parsedRedisCounter + 1);
 }
