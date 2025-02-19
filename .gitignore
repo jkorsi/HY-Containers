@@ -3,4 +3,7 @@ node_modules
 # test usage folder for playing with docker
 docker
 
+# test folder 2
+docker-vite
+
 package-lock.json
