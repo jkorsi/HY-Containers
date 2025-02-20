@@ -1,0 +1,11 @@
+services:
+  app:
+    image: todo-frontend-dev-2
+    build:
+      context: . # The context will pick this directory as the "build context", and look for the dev.Dockerfile from this folder
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - 5173:5173
+    container_name: todo-frontend-dev-2
