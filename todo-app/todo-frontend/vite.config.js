@@ -8,4 +8,11 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: "./src/Tests/setupTests.js",
   },
+  server: {
+    port: 3001, // must be a port other than 5173
+    host: true,
+    watch: {
+      usePolling: true,
+    },
+  },
 });
