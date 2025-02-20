@@ -19,6 +19,19 @@ services:
       - ./redis_data:/data
     # volumes:
     #   - cache:/data
+  server:
+    image: todo-backend-dev
+    build:
+      context: . # The context will pick this directory as the "build context", and look for the dev.Dockerfile from this folder
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./:/data/server
+    ports:
+      - 3000:3000
+    environment:
+      # Use internal docker network port for mongo/redis instead of host port
+      - MONGO_URL=mongodb://root:example@mongo-service:27017/the_database
+      - REDIS_URL=redis://redis-cache:6379
 
 volumes:
   mongo_data:
