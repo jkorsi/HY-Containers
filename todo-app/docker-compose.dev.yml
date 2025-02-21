@@ -1,4 +1,7 @@
 services:
+  #----------------------------------
+  #----------- FRONT END ------------
+  #----------------------------------
   app:
     image: todo-frontend-dev-2
     build:
@@ -7,8 +10,15 @@ services:
     volumes:
       - ./todo-frontend/:/usr/src/app
     ports:
+      # 3001 due to HMR configuration
       - 5173:3001
     container_name: todo-frontend-dev
+    environment:
+      - VITE_BACKEND_URL = http://server:3000
+
+  #----------------------------------
+  #--------- REVERSE PROXY ----------
+  #----------------------------------
   nginx:
     image: nginx:1.20.1
     volumes:
@@ -18,3 +28,50 @@ services:
     container_name: reverse-proxy
     depends_on:
       - app
+      - server
+      - redis-cache
+      - mongo-service
+
+    #----------------------------------
+    #----------- BACK END -------------
+    #----------------------------------
+  mongo-service:
+    image: initialized-mongo
+    ports:
+      - 3456:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: the_database
+    volumes:
+      - ./todo-backend/mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - ./todo-backend/mongo_data:/data/db
+
+  redis-cache:
+    image: redis:7.4.2
+    ports:
+      - 6379:6379
+    command: ["redis-server", "--appendonly", "yes"] # Overwrite the CMD
+    volumes: # Declare the volume
+      - ./todo-backend/redis_data:/data
+    # volumes:
+    #   - cache:/data
+
+  server:
+    image: todo-backend-dev
+    build:
+      context: . # The context will pick this directory as the "build context", and look for the dev.Dockerfile from this folder
+      dockerfile: ./todo-backend/dev.Dockerfile
+    volumes:
+      - ./todo-backend/:/data/server
+    ports:
+      - 3000:3000
+    environment:
+      # Use internal docker network port for mongo/redis instead of host port
+      - MONGO_URL=mongodb://root:example@mongo-service:27017/the_database
+      - REDIS_URL=redis://redis-cache:6379
+
+volumes:
+  mongo_data:
+  cache:
+    driver: local
