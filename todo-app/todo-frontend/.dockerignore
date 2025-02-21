@@ -4,6 +4,4 @@ node_modules
 Dockerfile
 dev.Dockerfile
 docker-compose.*
-mongo_data
-redis_data
 .env

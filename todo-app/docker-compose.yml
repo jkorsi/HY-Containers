@@ -1,0 +1,60 @@
+services:
+  #----------------------------------
+  #----------- FRONT END ------------
+  #----------------------------------
+  app:
+    build:
+      context: ./todo-frontend/
+      dockerfile: Dockerfile
+    container_name: todo-frontend-prod
+
+  #----------------------------------
+  #--------- REVERSE PROXY ----------
+  #----------------------------------
+  nginx:
+    image: nginx:1.20.1
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:80
+    container_name: reverse-proxy-prod
+    depends_on:
+      - app
+      - server
+      - redis-cache
+      - mongo-service
+
+    #----------------------------------
+    #----------- BACK END -------------
+    #----------------------------------
+  mongo-service:
+    image: initialized-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: the_database
+    volumes:
+      - mongo_data:/data/db
+
+  redis-cache:
+    image: redis:7.4.2
+    command: ["redis-server", "--appendonly", "yes"] # Overwrite the CMD
+    volumes: # Declare the volume
+      - cache:/data
+
+  server:
+    build:
+      context: ./todo-backend/ # The context will pick this directory as the "build context", and look for the Dockerfile from this folder
+      dockerfile: Dockerfile
+    environment:
+      # Use internal docker network port for mongo/redis instead of host port
+      - MONGO_URL=mongodb://root:example@mongo-service:27017/the_database
+      - REDIS_URL=redis://redis-cache:6379
+    depends_on:
+      - mongo-service
+      - redis-cache
+
+volumes:
+  mongo_data:
+  cache:
+    driver: local
